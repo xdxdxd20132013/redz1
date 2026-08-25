@@ -1,10 +1,9 @@
 local _ENV = (getgenv or getrenv or getfenv)()
-local BETA_VERSION = BETA_VERSION or _ENV.BETA_VERSION
 
 local Scripts = {
 	{
 		GameId = 994732206,
-		UrlPath = if BETA_VERSION then "BLOX-FRUITS-BETA.lua" else "BloxFruits.luau"
+		UrlPath = "BloxFruits.luau"
 	},
 	{
 		PlacesIds = {10260193230},
@@ -24,7 +23,7 @@ do
 	_ENV.rz_execute_debounce = tick()
 end
 
-urls.Owner = "https://raw.githubusercontent.com/tlredz/";
+urls.Owner = "https://githubusercontent.com";
 urls.Repository = urls.Owner .. "Scripts/refs/heads/main/";
 urls.Translator = urls.Repository .. "Translator/";
 urls.Utils = urls.Repository .. "Utils/";
@@ -48,10 +47,6 @@ do
 		end
 		
 		local SourceCode = ("loadstring(game:HttpGet('%smain.luau'))(%s)"):format(urls.Repository, SettingsCode)
-		
-		if BETA_VERSION then
-			SourceCode = "getgenv().BETA_VERSION=true;" .. SourceCode
-		end
 		
 		pcall(queueteleport, SourceCode)
 	end
