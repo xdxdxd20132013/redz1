@@ -1,63 +1,20 @@
-local _ENV = (getgenv or getrenv or getfenv)()
-local BETA_VERSION = BETA_VERSION or _ENV.BETA_VERSION
-
 local Scripts = {
 	{
-		GameId = 994732206,
-		UrlPath = if BETA_VERSION then "BLOX-FRUITS-BETA.lua" else "BloxFruits.luau"
-	},
-	{
-		PlacesIds = {10260193230},
-		UrlPath = "MemeSea.luau"
+		PlacesIds = {2753915549, 4442272183, 7449423635},
+		Path = "BloxFruits.luau"
 	}
 }
 
 local fetcher, urls = {}, {}
 
-do
-	local last_exec = _ENV.rz_execute_debounce
-	
-	if last_exec and (tick() - last_exec) <= 5 then
-		return nil
-	end
-	
-	_ENV.rz_execute_debounce = tick()
-end
-
-urls.Owner = "https://raw.githubusercontent.com/tlredz/";
-urls.Repository = urls.Owner .. "Scripts/refs/heads/main/";
-urls.Translator = urls.Repository .. "Translator/";
-urls.Utils = urls.Repository .. "Utils/";
+urls.Owner = "https://raw.githubusercontent.com/notredz/";
+urls.Repository = `{ urls.Owner }Scripts/refs/heads/main/`;
+urls.Translator = `{ urls.Repository }Translator/`;
+urls.Utils = `{ urls.Repository }Utils/`;
 
 do
-	local executor = syn or fluxus
-	local queueteleport = queue_on_teleport or (executor and executor.queue_on_teleport)
+	local _ENV = (getgenv or getrenv or getfenv)()
 	
-	if not _ENV.rz_added_teleport_queue and type(queueteleport) == "function" then
-		local ScriptSettings = {...}
-		local SettingsCode = ""
-		
-		_ENV.rz_added_teleport_queue = true
-		
-		local Success, EncodedSettings = pcall(function()
-			return game:GetService("HttpService"):JSONEncode(ScriptSettings)
-		end)
-		
-		if Success and EncodedSettings then
-			SettingsCode = "unpack(game:GetService('HttpService'):JSONDecode('" .. EncodedSettings .. "'))"
-		end
-		
-		local SourceCode = ("loadstring(game:HttpGet('%smain.luau'))(%s)"):format(urls.Repository, SettingsCode)
-		
-		if BETA_VERSION then
-			SourceCode = "getgenv().BETA_VERSION=true;" .. SourceCode
-		end
-		
-		pcall(queueteleport, SourceCode)
-	end
-end
-
-do
 	if _ENV.rz_error_message then
 		_ENV.rz_error_message:Destroy()
 	end
@@ -76,9 +33,9 @@ do
 	end
 	
 	local function formatUrl(Url)
-		for key, path in urls do
-			if Url:find("{" .. key .. "}") then
-				return Url:gsub("{" .. key .. "}", path)
+		for string, path in urls do
+			if Url:find("{" .. string .. "}") then
+				return Url:gsub("{" .. string .. "}", path)
 			end
 		end
 		
@@ -97,29 +54,29 @@ do
 		end
 	end
 	
-	function fetcher.load(Url: string, concat: string?)
+	function fetcher.load(Url, concat)
 		local raw = fetcher.get(Url) .. (if concat then concat else "")
-		local runFunction, errorText = loadstring(raw)
+		local execute, error = loadstring(raw)
 		
-		if type(runFunction) ~= "function" then
-			CreateMessageError(`[2] [{ identifyexecutor() }] sintax error: { Url }\n>>{ errorText }<<`)
+		if type(execute) ~= "function" then
+			CreateMessageError(`[2] [{ identifyexecutor() }] sintax error: { Url }\n>>{ error }<<`)
 		else
-			return runFunction
+			return (function(...)
+				local body = { pcall(execute, ...) }
+				
+				if body[1] == false then
+					CreateMessageError(`[3] [{ identifyexecutor() }] execute error: { Url }\n>>{ body[2] }<<`)
+				else
+					table.remove(body, 1)
+					return unpack(body)
+				end
+			end)
 		end
 	end
 end
 
-local function IsPlace(Script)
-	if Script.PlacesIds and table.find(Script.PlacesIds, game.PlaceId) then
-		return true
-	elseif Script.GameId and Script.GameId == game.GameId then
-		return true
+for _, Data in Scripts do
+	if table.find(Data.PlacesIds, game.PlaceId) then
+		return fetcher.load("{Repository}/Games/" .. Data.Path)(fetcher, ...)
 	end
-	return false
-end
-
-for _, Script in Scripts do
-	if IsPlace(Script) then
-		return fetcher.load("{Repository}Games/" .. Script.UrlPath)(fetcher, ...)
-	end
-end
+  end
