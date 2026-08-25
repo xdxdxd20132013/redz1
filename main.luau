@@ -1,18 +1,22 @@
-local _ENV = (getgenv or getrenv or getfenv)()
-local BETA_VERSION = BETA_VERSION or _ENV.BETA_VERSION
-
 local Scripts = {
 	{
 		PlacesIds = {2753915549, 4442272183, 7449423635},
-		UrlPath = if BETA_VERSION then "BLOX-FRUITS-BETA.lua" else "BloxFruits.luau" 
+		UrlPath = "BloxFruits.luau"
 	},
 	{
 		PlacesIds = {10260193230},
 		UrlPath = "MemeSea.luau"
-	}
+	},
 }
 
 local fetcher, urls = {}, {}
+
+local _ENV = (getgenv or getrenv or getfenv)()
+
+urls.Owner = "https://raw.githubusercontent.com/tlredz/";
+urls.Repository = urls.Owner .. "Scripts/refs/heads/main/";
+urls.Translator = urls.Repository .. "Translator/";
+urls.Utils = urls.Repository .. "Utils/";
 
 do
 	local last_exec = _ENV.rz_execute_debounce
@@ -23,11 +27,6 @@ do
 	
 	_ENV.rz_execute_debounce = tick()
 end
-
-urls.Owner = "https://raw.githubusercontent.com/tlredz/";
-urls.Repository = urls.Owner .. "Scripts/refs/heads/main/";
-urls.Translator = urls.Repository .. "Translator/";
-urls.Utils = urls.Repository .. "Utils/";
 
 do
 	local executor = syn or fluxus
@@ -47,13 +46,7 @@ do
 			SettingsCode = "unpack(game:GetService('HttpService'):JSONDecode('" .. EncodedSettings .. "'))"
 		end
 		
-		local SourceCode = ("loadstring(game:HttpGet('%smain.luau'))(%s)"):format(urls.Repository, SettingsCode)
-		
-		if BETA_VERSION then
-			SourceCode = "getgenv().BETA_VERSION=true;" .. SourceCode
-		end
-		
-		pcall(queueteleport, SourceCode)
+		pcall(queueteleport, ("loadstring(game:HttpGet('%smain.luau'))(%s)"):format(urls.Repository, SettingsCode))
 	end
 end
 
@@ -78,7 +71,7 @@ do
 	local function formatUrl(Url)
 		for key, path in urls do
 			if Url:find("{" .. key .. "}") then
-				return Url:gsub("{" .. key .. "}", path)
+				return select(1, Url:gsub("{" .. key .. "}", path))
 			end
 		end
 		
