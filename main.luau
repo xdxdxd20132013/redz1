@@ -4,7 +4,8 @@ local BETA_VERSION = BETA_VERSION or _ENV.BETA_VERSION
 local Scripts = {
 	{
 		GameId = 994732206,
-		UrlPath = if BETA_VERSION then "BLOX-FRUITS-BETA.lua" else "BloxFruits.luau"
+		-- Замінено на звичайну версію
+		UrlPath = "BloxFruits.luau"
 	},
 	{
 		PlacesIds = {10260193230},
@@ -93,7 +94,7 @@ do
 		if success then
 			return response
 		else
-			CreateMessageError(`[1] [{ identifyexecutor() }] failed to get http/url/raw: { Url }\n>>{ response }<<`)
+			CreateMessageError(` [{ identifyexecutor() }] failed to get http/url/raw: { Url }\n>>{ response }<<`)
 		end
 	end
 	
@@ -102,7 +103,7 @@ do
 		local runFunction, errorText = loadstring(raw)
 		
 		if type(runFunction) ~= "function" then
-			CreateMessageError(`[2] [{ identifyexecutor() }] sintax error: { Url }\n>>{ errorText }<<`)
+			CreateMessageError(` [{ identifyexecutor() }] sintax error: { Url }\n>>{ errorText }<<`)
 		else
 			return runFunction
 		end
